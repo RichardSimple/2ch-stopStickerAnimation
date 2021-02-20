@@ -3,7 +3,7 @@
 // @include		https://2ch.*/res/*
 // @grant		none
 // @version		1
-// @description		
+// @run-at		document-idle
 // ==/UserScript==
 
 (function() {
