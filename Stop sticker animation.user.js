@@ -2,7 +2,7 @@
 // @name		Stop sticker animation
 // @include		https://2ch.*/res/*
 // @grant		none
-// @version		1
+// @version		1.1
 // @run-at		document-idle
 // ==/UserScript==
 
@@ -19,14 +19,22 @@
 			console.log("Обарботан стикер(кэш) ", img);
 			return;
 		}
-		imgCache[img.src] = img;
-		canvas.width = img.width;
-		canvas.height = img.height;
-		
-		ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
-		
-		img.src = canvas.toDataURL("image/gif");
-		console.log("Обарботан стикер ", img);
+		new Promise(function(resolve) {
+			if(!img.complete || img.naturalWidth === 0)
+				img.addEventListener("load", resolve, {once: true});
+			else
+				resolve();
+		})
+		.then(function() {
+			imgCache[img.src] = img;
+			canvas.width = img.width;
+			canvas.height = img.height;
+
+			ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+			img.src = canvas.toDataURL("image/gif");
+			console.log("Обарботан стикер ", img);
+		});
 	}catch(e){
 		console.warn("Обработка стикера ", img, " не удалась: ", e);
 	}};
@@ -36,7 +44,7 @@
 		let counter = 50;
 		const interval = setInterval(function() {
 			if(!thread[0]) {
-				if(!(--counter))
+				if(--counter)
 					return;
 				clearInterval(interval);
 				reject(new Error(".thread not found"));
